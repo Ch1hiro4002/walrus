@@ -232,10 +232,10 @@
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="walrus"><a class="header" href="#walrus">Walrus</a></h1>
-<p>Welcome to the developer documentation for Walrus, a decentralized storage and data availability
-protocol designed specifically for large binary files, or "blobs". Walrus focuses on providing a
-robust but affordable solution for storing unstructured content on decentralized storage nodes
-while ensuring high availability and reliability even in the presence of Byzantine faults.</p>
+<p>Welcome to the developer documentation for Walrus, a developer platform that enables data markets
+for the AI era. Walrus focuses on providing a robust but affordable solution for storing
+unstructured content on decentralized storage nodes while ensuring high availability and
+reliability even in the presence of Byzantine faults.</p>
 <div id="admonition-fun-fact" class="admonition admonish-tip" role="note" aria-labelledby="admonition-fun-fact-title">
 <div class="admonition-title">
 <div id="admonition-fun-fact-title">
@@ -905,7 +905,7 @@ for an overview over all Walrus networks.</p>
 </div>
 <div>
 <p>If you just want to set up a new Sui wallet for Walrus, you can generate one using the
-<code>walrus generate-sui-wallet --network mainnet</code> command after <a href="usage/setup.html#installation">installing Walrus</a>.
+<code>walrus generate-sui-wallet --sui-network mainnet</code> command after <a href="usage/setup.html#installation">installing Walrus</a>.
 You still need to obtain some SUI and WAL tokens, but you do not have to install the Sui CLI.</p>
 </div>
 </div>
@@ -913,10 +913,11 @@ You still need to obtain some SUI and WAL tokens, but you do not have to install
 normal way to set this up is via the Sui CLI; see the <a href="https://docs.sui.io/guides/developer/getting-started/sui-install">installation
 instructions</a> in the Sui
 documentation.</p>
-<p>After installing the Sui CLI, you need to set up a wallet by running <code>sui client</code>, which
-prompts you to set up a new configuration. Make sure to point it to Sui Mainnet, you can use the
-full node at <code>https://fullnode.mainnet.sui.io:443</code> for this. See <a href="https://docs.sui.io/guides/developer/getting-started/connect">the Sui
-documentation</a> for further details.</p>
+<p>After installing the Sui CLI, you need to set up a wallet by running <code>sui client</code>, which prompts you
+to set up a new configuration. Make sure to point it to Sui Mainnet, you can use the full node at
+<code>https://fullnode.mainnet.sui.io:443</code> for this. See <a href="https://docs.sui.io/guides/developer/getting-started/configure-sui-client">the Sui
+documentation</a> for
+further details.</p>
 <p>After this, you should get something like this (everything besides the <code>mainnet</code> line is optional):</p>
 <pre><code class="language-terminal">$ sui client envs
 ╭──────────┬─────────────────────────────────────┬────────╮
@@ -1194,8 +1195,9 @@ documentation. If you do not want to install the Sui CLI, you can also generate 
 Testnet using <code>walrus generate-sui-wallet --network testnet</code>.</p>
 <p>After installing the Sui CLI, you need to set up a Testnet wallet by running <code>sui client</code>, which
 prompts you to set up a new configuration. Make sure to point it to Sui Testnet, you can use the
-full node at <code>https://fullnode.testnet.sui.io:443</code> for this. See <a href="https://docs.sui.io/guides/developer/getting-started/connect">the Sui
-documentation</a> for further details.</p>
+full node at <code>https://fullnode.testnet.sui.io:443</code> for this. See <a href="https://docs.sui.io/guides/developer/getting-started/configure-sui-client">the Sui
+documentation</a> for
+further details.</p>
 <p>If you already have a Sui wallet configured, you can directly set up the Testnet environment (if you
 don't have it yet),</p>
 <pre><code class="language-sh">sui client new-env --alias testnet --rpc https://fullnode.testnet.sui.io:443
@@ -1531,9 +1533,20 @@ The existence of this event certifies the availability of the blob.</p>
 <p>Reading blobs from Walrus can be achieved through the following command:</p>
 <pre><code class="language-sh">walrus read &lt;some blob ID&gt;
 </code></pre>
-<p>By default the blob data is written to the standard output. The <code>--out &lt;OUT&gt;</code> CLI option
-can be used to specify an output file name. The <code>--rpc-url &lt;URL&gt;</code> may be used to specify
-a Sui RPC node to use instead of the one set in the wallet configuration or the default one.</p>
+<p>By default the blob data is written to the standard output. The <code>--out &lt;OUT&gt;</code> CLI option can be used
+to specify an output file name. The <code>--rpc-url &lt;URL&gt;</code> may be used to specify a Sui RPC node to use
+instead of the one set in the wallet configuration or the configuration file.</p>
+<h3 id="consistency-checks"><a class="header" href="#consistency-checks">Consistency checks</a></h3>
+<p>Walrus performs integrity and consistency checks to ensure that any data read from Walrus is what
+the writer intended, and that the writer encoded the blob correctly, see the <a href="usage/../design/encoding.html#data-integrity-and-consistency">section about data
+consistency</a> for further details. Before
+<code>v1.37</code> the Walrus CLI and aggregator always perform the <a href="usage/../design/encoding.html#strict-consistency-check">strict consistency
+check</a>. Starting with <code>v1.37</code>, the default is a <a href="usage/../design/encoding.html#default-consistency-check">more
+performant consistency check</a>, which is sufficient for
+the majority of cases. The strict consistency check can be enabled through the flag
+<code>--strict-consistency-check</code> (added in <code>v1.35</code>).</p>
+<p>Consistency checks can be disabled completely through the flag <code>--skip-consistency-check</code> (added in
+<code>v1.36</code>). This should only be used if the writer of the blob is known and trusted.</p>
 <h2 id="extending-the-lifetime-of-a-blob"><a class="header" href="#extending-the-lifetime-of-a-blob">Extending the lifetime of a blob</a></h2>
 <p>Recall that when you stored your blob, it was necessary to specify its <a href="usage/client-cli.html#storing-blobs">end epoch</a>.
 By specifying the end epoch you ensured that the blob would be available via <code>walrus read</code> (or other
@@ -1901,6 +1914,7 @@ good job of inferring content types for media. However, the aggregator on purpos
 sniffing from inferring dangerous executable types such as JavaScript or style sheet types.</p>
 </div>
 </div>
+<h4 id="reading-by-object-id"><a class="header" href="#reading-by-object-id">Reading by object ID</a></h4>
 <p>Blobs may also be read by using the object ID of a Sui blob object or a shared blob.
 For example the following
 cURL command downloads the blob corresponding to a Sui blob with a specific object ID:</p>
@@ -1910,6 +1924,12 @@ cURL command downloads the blob corresponding to a Sui blob with a specific obje
 The aggregator recognizes the attribute keys <code>content-disposition</code>, <code>content-encoding</code>,
 <code>content-language</code>, <code>content-location</code>, <code>content-type</code>, and <code>link</code>, and when present returns
 the values in the corresponding HTTP headers.</p>
+<h4 id="consistency-checks-1"><a class="header" href="#consistency-checks-1">Consistency checks</a></h4>
+<p>The consistency checks performed by the aggregator are the same as the ones <a href="usage/./client-cli.html#consistency-checks">performed by the CLI</a>.
+For special use cases, the <a href="usage/../design/encoding.html#strict-consistency-check">strict consistency check</a>
+can be enabled by adding a query parameter <code>strict_consistency_check=true</code> (starting with <code>v1.35</code>).
+If the writer of the blob is known and trusted, the consistency check can be disabled by adding a
+query parameter <code>skip_consistency_check=true</code> (starting with <code>v1.36</code>).</p>
 <h3 id="quilt-http-apis"><a class="header" href="#quilt-http-apis">Quilt HTTP APIs</a></h3>
 <p>Walrus supports storing and retrieving multiple blobs as a single unit called a <a href="usage/./quilt.html">quilt</a>.
 The publishers and aggregators support <em>quilt</em> related operations.</p>
@@ -2083,184 +2103,518 @@ once per week.</p>
 <p>The following is a list of known public aggregators on Walrus Mainnet; they are checked
 periodically, but each of them may still be temporarily unavailable:</p>
 <ul>
-<li><code>https://agg.walrus.eosusa.io</code></li>
-<li><code>https://aggregator.mainnet.walrus.mirai.cloud</code></li>
-<li><code>https://aggregator.suicore.com</code></li>
-<li><code>https://aggregator.walrus-mainnet.h2o-nodes.com</code></li>
-<li><code>https://aggregator.walrus-mainnet.tududes.com</code></li>
-<li><code>https://aggregator.walrus-mainnet.walrus.space</code></li>
-<li><code>https://aggregator.walrus.atalma.io</code></li>
-<li><code>https://aggregator.walrus.mainnet.mozcomputing.dev</code></li>
-<li><code>https://aggregator.walrus.silentvalidator.com</code></li>
-<li><code>https://mainnet-aggregator.hoh.zone</code></li>
-<li><code>https://mainnet-aggregator.walrus.graphyte.dev</code></li>
-<li><code>https://mainnet-walrus-aggregator.kiliglab.io</code></li>
-<li><code>https://sm1-walrus-mainnet-aggregator.stakesquid.com</code></li>
-<li><code>https://sui-walrus-mainnet-aggregator.bwarelabs.com</code></li>
-<li><code>https://suiftly.mhax.io</code></li>
-<li><code>https://wal-aggregator-mainnet.staketab.org</code></li>
-<li><code>https://walmain.agg.chainflow.io</code></li>
-<li><code>https://walrus-agg.mainnet.obelisk.sh</code></li>
-<li><code>https://walrus-aggregator-mainnet.chainode.tech:9002</code></li>
-<li><code>https://walrus-aggregator.brightlystake.com</code></li>
-<li><code>https://walrus-aggregator.chainbase.online</code></li>
-<li><code>https://walrus-aggregator.n1stake.com</code></li>
-<li><code>https://walrus-aggregator.natsai.xyz</code></li>
-<li><code>https://walrus-aggregator.rockfin.io</code></li>
-<li><code>https://walrus-aggregator.rubynodes.io</code></li>
-<li><code>https://walrus-aggregator.stakely.io</code></li>
-<li><code>https://walrus-aggregator.stakin-nodes.com</code></li>
-<li><code>https://walrus-aggregator.staking4all.org</code></li>
-<li><code>https://walrus-aggregator.starduststaking.com</code></li>
-<li><code>https://walrus-aggregator.talentum.id</code></li>
-<li><code>https://walrus-aggregator.thcloud.ai</code></li>
-<li><code>https://walrus-aggregator.thepassivetrust.com</code></li>
-<li><code>https://walrus-cache-mainnet.latitude.sh</code></li>
-<li><code>https://walrus-cache-mainnet.overclock.run</code></li>
-<li><code>https://walrus-main-aggregator.4everland.org</code></li>
-<li><code>https://walrus-mainnet-aggregator-1.zkv.xyz</code></li>
-<li><code>https://walrus-mainnet-aggregator.crouton.digital</code></li>
-<li><code>https://walrus-mainnet-aggregator.dzdaic.com</code></li>
-<li><code>https://walrus-mainnet-aggregator.everstake.one</code></li>
-<li><code>https://walrus-mainnet-aggregator.imperator.co</code></li>
-<li><code>https://walrus-mainnet-aggregator.luckyresearch.org</code></li>
-<li><code>https://walrus-mainnet-aggregator.nami.cloud</code></li>
-<li><code>https://walrus-mainnet-aggregator.nodeinfra.com</code></li>
-<li><code>https://walrus-mainnet-aggregator.redundex.com</code></li>
-<li><code>https://walrus-mainnet-aggregator.rpc101.org</code></li>
-<li><code>https://walrus-mainnet-aggregator.stakecraft.com</code></li>
-<li><code>https://walrus-mainnet-aggregator.stakeengine.co.uk</code></li>
-<li><code>https://walrus-mainnet-aggregator.stakingdefenseleague.com.</code></li>
-<li><code>https://walrus-mainnet-aggregator.trusted-point.com</code></li>
-<li><code>https://walrus.aggregator.stakepool.dev.br</code></li>
-<li><code>https://walrus.blockscope.net</code></li>
-<li><code>https://walrus.globalstake.io</code></li>
-<li><code>https://walrus.lakestake.io</code></li>
-<li><code>https://walrus.lionscraft.blockscape.network:9000</code></li>
-<li><code>https://walrus.prostaking.com:9443</code></li>
-<li><code>https://walrus.veera.com</code></li>
-<li><code>https://walrusagg.pops.one</code></li>
-<li><code>http://walrus-aggregator.winsnip.site:9000</code></li>
-<li><code>http://walrus.equinoxdao.xyz:9000</code></li>
-<li><code>http://67.220.194.10:9000</code></li>
+<li>
+<p><code>http://67.220.194.10:9000</code></p>
+</li>
+<li>
+<p><code>http://walrus-aggregator.winsnip.site:9000</code></p>
+</li>
+<li>
+<p><code>http://walrus.equinoxdao.xyz:9000</code></p>
+</li>
+<li>
+<p><code>https://agg.walrus.eosusa.io</code></p>
+</li>
+<li>
+<p><code>https://aggregator.mainnet.walrus.mirai.cloud</code></p>
+</li>
+<li>
+<p><code>https://aggregator.suicore.com</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus-mainnet.h2o-nodes.com</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus-mainnet.tududes.com</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus-mainnet.walrus.space</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus.atalma.io</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus.mainnet.mozcomputing.dev</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus.silentvalidator.com</code></p>
+</li>
+<li>
+<p><code>https://mainnet-aggregator.hoh.zone</code></p>
+</li>
+<li>
+<p><code>https://mainnet-aggregator.walrus.graphyte.dev</code></p>
+</li>
+<li>
+<p><code>https://mainnet-walrus-aggregator.kiliglab.io</code></p>
+</li>
+<li>
+<p><code>https://sm1-walrus-mainnet-aggregator.stakesquid.com</code></p>
+</li>
+<li>
+<p><code>https://sui-walrus-mainnet-aggregator.bwarelabs.com</code></p>
+</li>
+<li>
+<p><code>https://suiftly.mhax.io</code></p>
+</li>
+<li>
+<p><code>https://wal-aggregator-mainnet.staketab.org</code></p>
+</li>
+<li>
+<p><code>https://walmain.agg.chainflow.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-agg.mainnet.obelisk.sh</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator-mainnet.chainode.tech:9002</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.brightlystake.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.chainbase.online</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.n1stake.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.natsai.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.rockfin.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.rubynodes.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.stakely.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.stakin-nodes.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.staking4all.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.starduststaking.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.talentum.id</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.thcloud.ai</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.thepassivetrust.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-cache-mainnet.latitude.sh</code></p>
+</li>
+<li>
+<p><code>https://walrus-cache-mainnet.overclock.run</code></p>
+</li>
+<li>
+<p><code>https://walrus-main-aggregator.4everland.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator-1.zkv.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.crouton.digital</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.dzdaic.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.everstake.one</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.imperator.co</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.luckyresearch.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.nami.cloud</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.nodeinfra.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.redundex.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.rpc101.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.stakecraft.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.stakeengine.co.uk</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.stakingdefenseleague.com.</code></p>
+</li>
+<li>
+<p><code>https://walrus-mainnet-aggregator.trusted-point.com</code></p>
+</li>
+<li>
+<p><code>https://walrus.aggregator.stakepool.dev.br</code></p>
+</li>
+<li>
+<p><code>https://walrus.blockscope.net</code></p>
+</li>
+<li>
+<p><code>https://walrus.globalstake.io</code></p>
+</li>
+<li>
+<p><code>https://walrus.lakestake.io</code></p>
+</li>
+<li>
+<p><code>https://walrus.lionscraft.blockscape.network:9000</code></p>
+</li>
+<li>
+<p><code>https://walrus.prostaking.com:9443</code></p>
+</li>
+<li>
+<p><code>https://walrus.veera.com</code></p>
+</li>
+<li>
+<p><code>https://walrusagg.pops.one</code></p>
+</li>
 </ul>
 <h3 id="testnet"><a class="header" href="#testnet">Testnet</a></h3>
 <h4 id="aggregators-testnet"><a class="header" href="#aggregators-testnet">Aggregators</a></h4>
 <p>The following is a list of known public aggregators on Walrus Testnet; they are checked
 periodically, but each of them may still be temporarily unavailable:</p>
 <ul>
-<li><code>https://agg.test.walrus.eosusa.io</code></li>
-<li><code>https://aggregator.testnet.walrus.atalma.io</code></li>
-<li><code>https://aggregator.testnet.walrus.mirai.cloud</code></li>
-<li><code>https://aggregator.walrus-01.tududes.com</code></li>
-<li><code>https://aggregator.walrus-testnet.h2o-nodes.com</code></li>
-<li><code>https://aggregator.walrus-testnet.walrus.space</code></li>
-<li><code>https://aggregator.walrus.banansen.dev</code></li>
-<li><code>https://aggregator.walrus.testnet.mozcomputing.dev</code></li>
-<li><code>https://sm1-walrus-testnet-aggregator.stakesquid.com</code></li>
-<li><code>https://sui-walrus-tn-aggregator.bwarelabs.com</code></li>
-<li><code>https://suiftly-testnet-agg.mhax.io</code></li>
-<li><code>https://testnet-aggregator-walrus.kiliglab.io</code></li>
-<li><code>https://testnet-aggregator.walrus.graphyte.dev</code></li>
-<li><code>https://testnet-walrus.globalstake.io</code></li>
-<li><code>https://testnet.aggregator.walrus.silentvalidator.com</code></li>
-<li><code>https://wal-aggregator-testnet.staketab.org</code></li>
-<li><code>https://walrus-agg-test.bucketprotocol.io</code></li>
-<li><code>https://walrus-agg-testnet.chainode.tech:9002</code></li>
-<li><code>https://walrus-agg.testnet.obelisk.sh</code></li>
-<li><code>https://walrus-aggregator-testnet.cetus.zone</code></li>
-<li><code>https://walrus-aggregator-testnet.haedal.xyz</code></li>
-<li><code>https://walrus-aggregator-testnet.n1stake.com</code></li>
-<li><code>https://walrus-aggregator-testnet.staking4all.org</code></li>
-<li><code>https://walrus-aggregator-testnet.suisec.tech</code></li>
-<li><code>https://walrus-aggregator.thcloud.dev</code></li>
-<li><code>https://walrus-test-aggregator.thepassivetrust.com</code></li>
-<li><code>https://walrus-testnet-aggregator-1.zkv.xyz</code></li>
-<li><code>https://walrus-testnet-aggregator.brightlystake.com</code></li>
-<li><code>https://walrus-testnet-aggregator.chainbase.online</code></li>
-<li><code>https://walrus-testnet-aggregator.chainflow.io</code></li>
-<li><code>https://walrus-testnet-aggregator.crouton.digital</code></li>
-<li><code>https://walrus-testnet-aggregator.dzdaic.com</code></li>
-<li><code>https://walrus-testnet-aggregator.everstake.one</code></li>
-<li><code>https://walrus-testnet-aggregator.luckyresearch.org</code></li>
-<li><code>https://walrus-testnet-aggregator.natsai.xyz</code></li>
-<li><code>https://walrus-testnet-aggregator.nodeinfra.com</code></li>
-<li><code>https://walrus-testnet-aggregator.nodes.guru</code></li>
-<li><code>https://walrus-testnet-aggregator.redundex.com</code></li>
-<li><code>https://walrus-testnet-aggregator.rpc101.org</code></li>
-<li><code>https://walrus-testnet-aggregator.rubynodes.io</code></li>
-<li><code>https://walrus-testnet-aggregator.stakecraft.com</code></li>
-<li><code>https://walrus-testnet-aggregator.stakeengine.co.uk</code></li>
-<li><code>https://walrus-testnet-aggregator.stakely.io</code></li>
-<li><code>https://walrus-testnet-aggregator.stakeme.pro</code></li>
-<li><code>https://walrus-testnet-aggregator.stakin-nodes.com</code></li>
-<li><code>https://walrus-testnet-aggregator.stakingdefenseleague.com.</code></li>
-<li><code>https://walrus-testnet-aggregator.starduststaking.com</code></li>
-<li><code>https://walrus-testnet-aggregator.talentum.id</code></li>
-<li><code>https://walrus-testnet-aggregator.trusted-point.com</code></li>
-<li><code>https://walrus-testnet.blockscope.net</code></li>
-<li><code>https://walrus-testnet.lionscraft.blockscape.network:9000</code></li>
-<li><code>https://walrus-testnet.validators.services.kyve.network/aggregate</code></li>
-<li><code>https://walrus-testnet.veera.com</code></li>
-<li><code>https://walrus-tn.juicystake.io:9443</code></li>
-<li><code>https://walrus.testnet.aggregator.stakepool.dev.br</code></li>
-<li><code>https://walrusagg.testnet.pops.one</code></li>
-<li><code>http://cs74th801mmedkqu25ng.bdnodes.net:8443</code></li>
-<li><code>http://walrus-storage.testnet.nelrann.org:9000</code></li>
-<li><code>http://walrus-testnet.equinoxdao.xyz:9000</code></li>
-<li><code>http://walrus-testnet.suicore.com:9000</code></li>
+<li>
+<p><code>http://cs74th801mmedkqu25ng.bdnodes.net:8443</code></p>
+</li>
+<li>
+<p><code>http://walrus-storage.testnet.nelrann.org:9000</code></p>
+</li>
+<li>
+<p><code>http://walrus-testnet.equinoxdao.xyz:9000</code></p>
+</li>
+<li>
+<p><code>http://walrus-testnet.suicore.com:9000</code></p>
+</li>
+<li>
+<p><code>https://agg.test.walrus.eosusa.io</code></p>
+</li>
+<li>
+<p><code>https://aggregator.testnet.walrus.atalma.io</code></p>
+</li>
+<li>
+<p><code>https://aggregator.testnet.walrus.mirai.cloud</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus-01.tududes.com</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus-testnet.h2o-nodes.com</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus-testnet.walrus.space</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus.banansen.dev</code></p>
+</li>
+<li>
+<p><code>https://aggregator.walrus.testnet.mozcomputing.dev</code></p>
+</li>
+<li>
+<p><code>https://sm1-walrus-testnet-aggregator.stakesquid.com</code></p>
+</li>
+<li>
+<p><code>https://sui-walrus-tn-aggregator.bwarelabs.com</code></p>
+</li>
+<li>
+<p><code>https://suiftly-testnet-agg.mhax.io</code></p>
+</li>
+<li>
+<p><code>https://testnet-aggregator-walrus.kiliglab.io</code></p>
+</li>
+<li>
+<p><code>https://testnet-aggregator.walrus.graphyte.dev</code></p>
+</li>
+<li>
+<p><code>https://testnet-walrus.globalstake.io</code></p>
+</li>
+<li>
+<p><code>https://testnet.aggregator.walrus.silentvalidator.com</code></p>
+</li>
+<li>
+<p><code>https://wal-aggregator-testnet.staketab.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-agg-test.bucketprotocol.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-agg-testnet.chainode.tech:9002</code></p>
+</li>
+<li>
+<p><code>https://walrus-agg.testnet.obelisk.sh</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator-testnet.cetus.zone</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator-testnet.haedal.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator-testnet.n1stake.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator-testnet.staking4all.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator-testnet.suisec.tech</code></p>
+</li>
+<li>
+<p><code>https://walrus-aggregator.thcloud.dev</code></p>
+</li>
+<li>
+<p><code>https://walrus-test-aggregator.thepassivetrust.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator-1.zkv.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.brightlystake.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.chainbase.online</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.chainflow.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.crouton.digital</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.dzdaic.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.everstake.one</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.luckyresearch.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.natsai.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.nodeinfra.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.nodes.guru</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.redundex.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.rpc101.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.rubynodes.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.stakecraft.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.stakeengine.co.uk</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.stakely.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.stakeme.pro</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.stakin-nodes.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.stakingdefenseleague.com.</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.starduststaking.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.talentum.id</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-aggregator.trusted-point.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet.blockscope.net</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet.lionscraft.blockscape.network:9000</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet.validators.services.kyve.network/aggregate</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet.veera.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-tn.juicystake.io:9443</code></p>
+</li>
+<li>
+<p><code>https://walrus.testnet.aggregator.stakepool.dev.br</code></p>
+</li>
+<li>
+<p><code>https://walrusagg.testnet.pops.one</code></p>
+</li>
 </ul>
 <h4 id="publishers-testnet"><a class="header" href="#publishers-testnet">Publishers</a></h4>
 <p>The following is a list of known public publishers on Walrus Testnet; they are checked
 periodically, but each of them may still be temporarily unavailable:</p>
 <ul>
-<li><code>https://publisher.testnet.walrus.atalma.io</code></li>
-<li><code>https://publisher.walrus-01.tududes.com</code></li>
-<li><code>https://publisher.walrus-testnet.h2o-nodes.com</code></li>
-<li><code>https://publisher.walrus-testnet.walrus.space</code></li>
-<li><code>https://publisher.walrus.banansen.dev</code></li>
-<li><code>https://sm1-walrus-testnet-publisher.stakesquid.com</code></li>
-<li><code>https://sui-walrus-testnet-publisher.bwarelabs.com</code></li>
-<li><code>https://suiftly-testnet-pub.mhax.io</code></li>
-<li><code>https://testnet-publisher-walrus.kiliglab.io</code></li>
-<li><code>https://testnet-publisher.walrus.graphyte.dev</code></li>
-<li><code>https://testnet.publisher.walrus.silentvalidator.com</code></li>
-<li><code>https://wal-publisher-testnet.staketab.org</code></li>
-<li><code>https://walrus-publish-testnet.chainode.tech:9003</code></li>
-<li><code>https://walrus-publisher-testnet.n1stake.com</code></li>
-<li><code>https://walrus-publisher-testnet.staking4all.org</code></li>
-<li><code>https://walrus-publisher.rubynodes.io</code></li>
-<li><code>https://walrus-publisher.thcloud.dev</code></li>
-<li><code>https://walrus-testnet-published.luckyresearch.org</code></li>
-<li><code>https://walrus-testnet-publisher-1.zkv.xyz</code></li>
-<li><code>https://walrus-testnet-publisher.chainbase.online</code></li>
-<li><code>https://walrus-testnet-publisher.crouton.digital</code></li>
-<li><code>https://walrus-testnet-publisher.dzdaic.com</code></li>
-<li><code>https://walrus-testnet-publisher.everstake.one</code></li>
-<li><code>https://walrus-testnet-publisher.nami.cloud</code></li>
-<li><code>https://walrus-testnet-publisher.natsai.xyz</code></li>
-<li><code>https://walrus-testnet-publisher.nodeinfra.com</code></li>
-<li><code>https://walrus-testnet-publisher.nodes.guru</code></li>
-<li><code>https://walrus-testnet-publisher.redundex.com</code></li>
-<li><code>https://walrus-testnet-publisher.rpc101.org</code></li>
-<li><code>https://walrus-testnet-publisher.stakecraft.com</code></li>
-<li><code>https://walrus-testnet-publisher.stakeengine.co.uk</code></li>
-<li><code>https://walrus-testnet-publisher.stakely.io</code></li>
-<li><code>https://walrus-testnet-publisher.stakeme.pro</code></li>
-<li><code>https://walrus-testnet-publisher.stakingdefenseleague.com.</code></li>
-<li><code>https://walrus-testnet-publisher.starduststaking.com</code></li>
-<li><code>https://walrus-testnet-publisher.trusted-point.com</code></li>
-<li><code>https://walrus-testnet.blockscope.net:11444</code></li>
-<li><code>https://walrus-testnet.validators.services.kyve.network/publish</code></li>
-<li><code>https://walrus.testnet.publisher.stakepool.dev.br</code></li>
-<li><code>http://walrus-publisher-testnet.cetus.zone:9001</code></li>
-<li><code>http://walrus-publisher-testnet.haedal.xyz:9001</code></li>
-<li><code>http://walrus-publisher-testnet.suisec.tech:9001</code></li>
-<li><code>http://walrus-storage.testnet.nelrann.org:9001</code></li>
-<li><code>http://walrus-testnet.equinoxdao.xyz:9001</code></li>
-<li><code>http://walrus-testnet.suicore.com:9001</code></li>
-<li><code>http://walrus.testnet.pops.one:9001</code></li>
-<li><code>http://waltest.chainflow.io:9001</code></li>
+<li>
+<p><code>http://walrus-publisher-testnet.cetus.zone:9001</code></p>
+</li>
+<li>
+<p><code>http://walrus-publisher-testnet.haedal.xyz:9001</code></p>
+</li>
+<li>
+<p><code>http://walrus-publisher-testnet.suisec.tech:9001</code></p>
+</li>
+<li>
+<p><code>http://walrus-storage.testnet.nelrann.org:9001</code></p>
+</li>
+<li>
+<p><code>http://walrus-testnet.equinoxdao.xyz:9001</code></p>
+</li>
+<li>
+<p><code>http://walrus-testnet.suicore.com:9001</code></p>
+</li>
+<li>
+<p><code>http://walrus.testnet.pops.one:9001</code></p>
+</li>
+<li>
+<p><code>http://waltest.chainflow.io:9001</code></p>
+</li>
+<li>
+<p><code>https://publisher.testnet.walrus.atalma.io</code></p>
+</li>
+<li>
+<p><code>https://publisher.walrus-01.tududes.com</code></p>
+</li>
+<li>
+<p><code>https://publisher.walrus-testnet.h2o-nodes.com</code></p>
+</li>
+<li>
+<p><code>https://publisher.walrus-testnet.walrus.space</code></p>
+</li>
+<li>
+<p><code>https://publisher.walrus.banansen.dev</code></p>
+</li>
+<li>
+<p><code>https://sm1-walrus-testnet-publisher.stakesquid.com</code></p>
+</li>
+<li>
+<p><code>https://sui-walrus-testnet-publisher.bwarelabs.com</code></p>
+</li>
+<li>
+<p><code>https://suiftly-testnet-pub.mhax.io</code></p>
+</li>
+<li>
+<p><code>https://testnet-publisher-walrus.kiliglab.io</code></p>
+</li>
+<li>
+<p><code>https://testnet-publisher.walrus.graphyte.dev</code></p>
+</li>
+<li>
+<p><code>https://testnet.publisher.walrus.silentvalidator.com</code></p>
+</li>
+<li>
+<p><code>https://wal-publisher-testnet.staketab.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-publish-testnet.chainode.tech:9003</code></p>
+</li>
+<li>
+<p><code>https://walrus-publisher-testnet.n1stake.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-publisher-testnet.staking4all.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-publisher.rubynodes.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-publisher.thcloud.dev</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-published.luckyresearch.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher-1.zkv.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.chainbase.online</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.crouton.digital</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.dzdaic.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.everstake.one</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.nami.cloud</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.natsai.xyz</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.nodeinfra.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.nodes.guru</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.redundex.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.rpc101.org</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.stakecraft.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.stakeengine.co.uk</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.stakely.io</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.stakeme.pro</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.stakingdefenseleague.com.</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.starduststaking.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet-publisher.trusted-point.com</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet.blockscope.net:11444</code></p>
+</li>
+<li>
+<p><code>https://walrus-testnet.validators.services.kyve.network/publish</code></p>
+</li>
+<li>
+<p><code>https://walrus.testnet.publisher.stakepool.dev.br</code></p>
+</li>
 </ul>
 <!-- markdownlint-enable proper-names -->
 <p>Most of these limit requests to 10 MiB by default. If you want to upload larger files, you need to
@@ -2641,12 +2995,25 @@ managed by a set of <a href="https://github.com/MystenLabs/walrus/tree/main/cont
 that implement a full delegated proof of stake system based on the WAL token.</p>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="data-security"><a class="header" href="#data-security">Data security</a></h1>
-<p>Walrus provides decentralized storage for application and user data.
-Walrus ensures availability and integrity but does not provide native encryption for data.
-By default, all blobs stored in Walrus are public and discoverable by all.
-If your app needs encryption or access control, secure data before uploading to Walrus.</p>
-<h2 id="securing-data-with-seal"><a class="header" href="#securing-data-with-seal">Securing data with Seal</a></h2>
-<p>Use <a href="https://github.com/MystenLabs/seal">Seal</a> for encryption and onchain access control.</p>
+<p>Walrus provides decentralized storage for application and user data. This page summarizes the
+security guarantees provided by Walrus natively or through additional mechanisms like
+<a href="https://seal-docs.wal.app/">Seal</a>.</p>
+<h2 id="availability"><a class="header" href="#availability">Availability</a></h2>
+<p>The encoding mechanisms applied by Walrus guarantee that blobs can be written and remains available
+as long as 2/3 of the data is handled by honest and functional nodes. Once data is written, reads
+are even possible if as few as 1/3 of the nodes are available. This is described in further detail
+in the <a href="dev-guide/../walrus.pdf">whitepaper</a> and in the <a href="dev-guide/../design/properties.html">properties chapter</a>.</p>
+<h2 id="integrity"><a class="header" href="#integrity">Integrity</a></h2>
+<p>Walrus guarantees that any data read corresponds to what was intended by the writer. As the encoding
+is done by the client, it is possible that this encoding is incorrect (by mistake or on purpose).
+This causes some subtleties, which are described in the <a href="dev-guide/../design/encoding.html#metadata-and-data-authentication">encoding chapter</a>.</p>
+<h2 id="confidentiality-and-access-control-using-seal"><a class="header" href="#confidentiality-and-access-control-using-seal">Confidentiality and access control using Seal</a></h2>
+<p>As described above, Walrus ensures availability and integrity but does not provide native encryption
+for data. By default, <em>all blobs stored in Walrus are public and discoverable by everyone</em>. If your
+app needs encryption or access control, you need to secure data before uploading to Walrus.</p>
+<p>In principle, you can use any encryption and access-control mechanism you prefer. However, if you
+want onchain access control, <a href="https://seal-docs.wal.app/">Seal</a> is the most powerful and
+straight-forward option.</p>
 <p>Seal allows you to:</p>
 <ul>
 <li>Encrypt data using threshold encryption, where no single party holds the full decryption key.</li>
@@ -4034,6 +4401,23 @@ locations, publishing the <code>./walrus-snake</code> site is as simple as calli
 duration of an epoch is one day. On Mainnet, the duration of an epoch is two weeks.</p>
 </div>
 </div>
+<div id="admonition-important-testnet-vs-mainnet-access" class="admonition admonish-warning" role="note" aria-labelledby="admonition-important-testnet-vs-mainnet-access-title">
+<div class="admonition-title">
+<div id="admonition-important-testnet-vs-mainnet-access-title">
+<p>Important: Testnet vs Mainnet Access</p>
+</div>
+<a class="admonition-anchor-link" href="walrus-sites/tutorial-publish.html#admonition-important-testnet-vs-mainnet-access"></a>
+</div>
+<div>
+<p><strong>After publishing, how you access your site depends on which network you used:</strong></p>
+<ul>
+<li><strong>Mainnet sites</strong>: Can be accessed through any mainnet portal.
+<a href="https://wal.app">https://wal.app</a> serves Walrus Sites on mainnet by resolving SuiNS names that point to them.</li>
+<li><strong>Testnet sites</strong>: Can be accessed through any testnet portal.
+Walrus Foundation does not operate a testnet portal. You can <a href="walrus-sites/./portal.html">self-host or run one locally</a></li>
+</ul>
+</div>
+</div>
 <p>The end of the output should look like the following:</p>
 <pre><code class="language-txt">Execution completed
 Resource operations performed:
@@ -4061,7 +4445,8 @@ To browse the site, you have the following options:
 <a class="admonition-anchor-link" href="walrus-sites/tutorial-publish.html#admonition-note"></a>
 </div>
 <div>
-<p>Keep in mind that option 2 is only available on <code>mainnet</code>.</p>
+<p>Keep in mind that option 2 is only available on <code>mainnet</code>.
+For testnet sites, use option 1 - see the <a href="walrus-sites/./portal.html">portal setup guide</a> for instructions.</p>
 </div>
 </div>
 <p>This output tells you that, for each file in the folder, a new Walrus blob was created, and the
@@ -4996,7 +5381,7 @@ with the updated file.</p>
 <p>To use this feature:</p>
 <ol>
 <li>
-<p>Set <code>GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}</code> in your workflow</p>
+<p>Set <code>GITHUB_TOKEN: $</code> in your workflow</p>
 </li>
 <li>
 <p>Add these <a href="https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/controlling-permissions-for-github_token">permissions</a>
@@ -5229,18 +5614,28 @@ portals:</p>
 <li>service-worker based portals running in the browser.</li>
 </ol>
 <p>Currently, only a server-side portal is served at <a href="https://wal.app">https://wal.app</a>.</p>
-<div id="admonition-warning" class="admonition admonish-warning" role="note" aria-labelledby="admonition-warning-title">
+<div id="admonition-important-testnet-portal-access" class="admonition admonish-warning" role="note" aria-labelledby="admonition-important-testnet-portal-access-title">
 <div class="admonition-title">
-<div id="admonition-warning-title">
-<p>Warning</p>
+<div id="admonition-important-testnet-portal-access-title">
+<p>Important: Testnet Portal Access</p>
 </div>
-<a class="admonition-anchor-link" href="walrus-sites/portal.html#admonition-warning"></a>
+<a class="admonition-anchor-link" href="walrus-sites/portal.html#admonition-important-testnet-portal-access"></a>
 </div>
 <div>
-<p>We are sunsetting the testnet portal! From now on, you can only access the mainnet portal
-at <a href="https://wal.app">https://wal.app</a>.</p>
+<p><a href="https://wal.app">https://wal.app</a> only serves sites deployed on mainnet, linked with SuiNS names.
+You can run a portal to access mainnet sites as well.
+Walrus Foundation does not maintain a Portal that serves testnet Walrus Sites.
+To access Sites deployed on testnet you can either use a thirdparty testnet portal,
+self-host one or run one locally.</p>
 </div>
 </div>
+<p>We maintain a list of known portals. New portals can self-identify by opening a PR to add themselves
+to the list.</p>
+<h2 id="known-portals"><a class="header" href="#known-portals">Known portals</a></h2>
+<p>Portals can self-identify by opening a PR that adds an entry to <code>docs/book/portals/list.json</code>.</p>
+<ul>
+<li><code>https://wal.app (Mysten Labs)</code></li>
+</ul>
 <div id="admonition-hosting-of-the-service-worker" class="admonition admonish-note" role="note" aria-labelledby="admonition-hosting-of-the-service-worker-title">
 <div class="admonition-title">
 <div id="admonition-hosting-of-the-service-worker-title">
@@ -5829,6 +6224,11 @@ hold for honest end users that use honest intermediaries (caches and publishers)
 means for end users to audit the correct operation of both caches and publishers.</p>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="encoding-overheads-and-verification"><a class="header" href="#encoding-overheads-and-verification">Encoding, overheads, and verification</a></h1>
+<p>Walrus uses a bespoke erasure-code construction (RedStuff) based on efficiently computable
+Reed-Solomon codes. The full details of the encoding are described in the
+<a href="design/../walrus.pdf">whitepaper</a>. This page summarizes some of the basic techniques and terminology used
+by Walrus. See also the <a href="design/../glossary.html">glossary</a>.</p>
+<h2 id="basics"><a class="header" href="#basics">Basics</a></h2>
 <p>The following list summarizes the basic encoding and cryptographic techniques used in Walrus:</p>
 <ul>
 <li>
@@ -5857,8 +6257,9 @@ to all the storage shards.</p>
 </ul>
 <p>The detailed encoding setup results in an expansion of the blob size by a factor of <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4.5</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>.
 This is independent of the number of shards and the number of storage nodes.</p>
-<hr />
-<p>Each blob is also associated with some metadata including a <strong>blob ID</strong> to allow verification:</p>
+<h2 id="metadata-and-data-authentication"><a class="header" href="#metadata-and-data-authentication">Metadata and data authentication</a></h2>
+<p>Each blob is also associated with some metadata including a <strong>blob ID</strong> to allow data authenticity
+verification:</p>
 <ul>
 <li>
 <p>The blob ID is computed as an authenticator of the set of all shard data and metadata (byte size,
@@ -5872,23 +6273,106 @@ identifies the blob in the system.</p>
 authenticated structure corresponding to the blob hash (Merkle tree). A successful check means
 that the data is indeed as intended by the writer of the blob.</p>
 </li>
+</ul>
+<h2 id="data-integrity-and-consistency"><a class="header" href="#data-integrity-and-consistency">Data integrity and consistency</a></h2>
+<p>Slivers, metadata, and the blob ID are computed by the client when writing a blob. As clients are
+generally untrusted, any step in this computation can be incorrect, either through a bug or on
+purpose. Concretely, the client can make one or more of the following mistakes:</p>
+<ol>
+<li>Incorrectly compute slivers.</li>
+<li>Incorrectly compute the sliver hashes based on the slivers.</li>
+<li>Incorrectly compute the blob ID based on the sliver hashes and other metadata.</li>
+</ol>
+<p>Walrus has several mechanisms to detect each of these:</p>
+<ul>
 <li>
-<p>As the writer of a blob might have incorrectly encoded a blob (by mistake or on purpose), any
-party that reconstructs a blob ID from shard slivers must check that it encodes to the correct
-blob ID. The same is necessary when accepting any blob claiming to be a specific blob ID.</p>
-<p>This process involves re-encoding the blob using the erasure code, and deriving the blob ID again
-to check that the blob matches. This prevents a malformed blob (incorrectly erasure coded) from
-ever being read as a valid blob at any correct recipient.</p>
+<p>Inconsistencies of the last type (incorrect blob-ID computation) are detected immediately by
+storage nodes when the client attempts to upload metadata. Storage nodes will never issue storage
+certificates for such blobs, and they are therefore never even certified.</p>
 </li>
 <li>
-<p>A set of slivers equal to the reconstruction threshold belonging to a blob ID that are either
-inconsistent or lead to the reconstruction of a different ID represent an incorrect encoding. This
-happens only if the user that encoded the blob was faulty or malicious and encoded it incorrectly.</p>
-<p>Walrus can extract one symbol per sliver to form an inconsistency proof. Storage nodes can delete
-slivers belonging to inconsistently encoded blobs, and upon request return either the
-inconsistency proof or an inconsistency certificate posted on chain.</p>
+<p>Inconsistencies of the second type (incorrect sliver-hash computation) are generally detected
+either before or shortly after certification, unless the slivers with incorrect hashes are handled
+by malicious storage nodes.</p>
+<p>Honest storage nodes that are assigned a sliver with an incorrect hash attempt to recover it from
+other storage nodes and then notice the inconsistency. They can then extract one symbol per sliver
+to form an <em>inconsistency proof</em>, which is then used to mark the blob as <em>invalid</em>. After this,
+storage nodes can delete slivers belonging to inconsistently encoded blobs, and upon request
+return either the inconsistency proof or an inconsistency certificate posted on chain.</p>
+</li>
+<li>
+<p>Inconsistencies of the first type can also be detected by storage nodes. The process is the same
+as in the case above, but it is not guaranteed to be triggered immediately after certification.</p>
+<p>As a result, such inconsistencies may persist within the network for longer periods of time,
+requiring additional client-side checks.</p>
 </li>
 </ul>
+<p>The following sections describe the different types of consistency checks performed by clients.</p>
+<div id="admonition-select-the-appropriate-consistency-check" class="admonition admonish-info" role="note" aria-labelledby="admonition-select-the-appropriate-consistency-check-title">
+<div class="admonition-title">
+<div id="admonition-select-the-appropriate-consistency-check-title">
+<p>Select the appropriate consistency check</p>
+</div>
+<a class="admonition-anchor-link" href="design/encoding.html#admonition-select-the-appropriate-consistency-check"></a>
+</div>
+<div>
+<p>In the majority of cases, the default consistency check is sufficient, in particular if the writer
+of the blob is trusted. The strict consistency check is only needed if specific availability
+guarantees are required. If the writer of a blob is known and trusted, it is also possible to
+completely disable the consistency check.</p>
+</div>
+</div>
+<h3 id="default-consistency-check"><a class="header" href="#default-consistency-check">Default consistency check</a></h3>
+<p>When reading a blob from Walrus, a client first checks the authenticity of the metadata and then
+requests a subset of primary slivers checking their authenticity using the metadata. Using 334
+authentic primary slivers, the original blob data can be decoded.</p>
+<p>The encoding used by Walrus has the property that <em>the first 334 primary slivers contain the
+(potentially padded) unencoded data</em>. This means that the (cryptographic) hashes of these slivers
+together with the blob length uniquely determine the content of the blob. Therefore, by recomputing
+the sliver hashes of the first 334 slivers and checking them against the metadata, the client can
+verify that the decoded data is correct. If this check succeeds, the data is provided to the user,
+otherwise an error is returned. This check provides the following guarantees:</p>
+<div id="admonition-data-consistency-property" class="admonition admonish-tip" role="note" aria-labelledby="admonition-data-consistency-property-title">
+<div class="admonition-title">
+<div id="admonition-data-consistency-property-title">
+<p>Data consistency property</p>
+</div>
+<a class="admonition-anchor-link" href="design/encoding.html#admonition-data-consistency-property"></a>
+</div>
+<div>
+<p>Any correct client attempting to read a blob, performing the default consistency check, will either
+read the specific value authenticated by the writer or return an error.</p>
+</div>
+</div>
+<h3 id="strict-consistency-check"><a class="header" href="#strict-consistency-check">Strict consistency check</a></h3>
+<p>If the blob was encoded correctly, any set of 334 primary slivers decode to the same data. However,
+if the writer of a blob encoded the data incorrectly, different sets of slivers may decode to
+different data. Even in that case, there is only one correct value that can be read by an honest
+client (guarantee stated above), but some read attempts may result in a failure while others
+succeed. Furthermore, the blob may be detected as inconsistent by storage nodes at a later point,
+after which all read attempts would fail.</p>
+<p>For this reason, Walrus optionally offers a <em>strict consistency check</em>: After decoding the blob, the
+client fully <em>re-encodes</em> it and recomputes all hashes and the blob ID. Only if that computation
+results in the blob ID they are trying to read is the read considered successful. This check is
+strictly stronger than the default consistency check and therefore also fulfills the data
+consistency property above.</p>
+<p>In addition, this process <em>ensures that the original writer encoded the blob correctly</em>. Therefore,
+after a blob was read successfully with the strict consistency check enabled, the following property
+holds in addition:</p>
+<div id="admonition-guarantee-after-strict-consistency-check-succeeded" class="admonition admonish-tip" role="note" aria-labelledby="admonition-guarantee-after-strict-consistency-check-succeeded-title">
+<div class="admonition-title">
+<div id="admonition-guarantee-after-strict-consistency-check-succeeded-title">
+<p>Guarantee after strict consistency check succeeded</p>
+</div>
+<a class="admonition-anchor-link" href="design/encoding.html#admonition-guarantee-after-strict-consistency-check-succeeded"></a>
+</div>
+<div>
+<p>Any correct client attempting to read a blob during its lifetime will always succeed and read the
+same data intended by the writer, irrespective of which consistency check is performed.</p>
+</div>
+</div>
+<p>Note that for quilt patches, only a variant of the default consistency check is available, as only
+part of the quilt is read.</p>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="operations-1"><a class="header" href="#operations-1">Operations</a></h1>
 <p>Walrus operations can be separated in <a href="design/./operations-sui.html">interactions with the Sui chain</a>, which
